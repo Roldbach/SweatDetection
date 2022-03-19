@@ -1,0 +1,2 @@
+1. Add temperature storage into the dataset
+2. Finish the getLatest() in the UIController

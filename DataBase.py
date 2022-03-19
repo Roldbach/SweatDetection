@@ -1,3 +1,5 @@
+import copy
+
 from datetime import datetime, timedelta
 
 class DataBase():
@@ -6,8 +8,8 @@ class DataBase():
             Construct the database and load the stored data provided by
         the directory
 
-            If the file can't be successfully loaded, empty database would
-        be constructed
+            The code for CRP and ILBeta part is commented but could be used
+        once the IBD sensor is finished
 
             By default, the unit of maximum storage is in days
 
@@ -36,6 +38,31 @@ class DataBase():
     
     def getILBeta(self):
         return self.ILBeta
+
+    def getMaximumStorage(self):
+        return self.maximumStorage
+    
+    def getLatest(self):
+        self.truncate()
+        result={}
+        result["Na"]=self.getLatestData(self.Na)
+        result["K"]=self.getLatestData(self.K)
+        result["Glucose"]=self.getLatestData(self.Glucose)
+        result["CRP"]=self.getLatestData(self.CRP)
+        result["ILBeta"]=self.getLatestData(self.ILBeta)
+        return result
+
+    def getLatestData(self, dataset):
+        '''
+            Return the latest data stored in the dataset
+
+            Return None if no data stored previously
+        '''
+        try:
+            timeLine=list(dataset.keys())
+            return dataset[timeLine[-1]]
+        except:
+            return "None"
 
     def addNa(self, time, value):
         self.Na[time]=value
@@ -130,25 +157,30 @@ class DataBase():
             result[time]=dataset[time]
         return result
 
-    def update(self):
+    def truncate(self):
         self.sort()
-        self.updateData(self.Na)
-        self.updateData(self.K)
-        self.updateData(self.Glucose)
-        self.updateData(self.CRP)
-        self.updateData(self.ILBeta)
+        self.Na=self.truncateData(self.Na)
+        self.K=self.truncateData(self.K)
+        self.Glucose=self.truncateData(self.Glucose)
+        self.CRP=self.truncateData(self.CRP)
+        self.ILBeta=self.truncateData(self.ILBeta)
 
-    def updateData(self, dataset):
+    def truncateData(self, dataset, difference=None):
         '''
-            Update the dataset so that it only stores data within the maximum storage
+            Truncate the dataset using the given time difference
         '''
-        timeLine=list(dataset.keys())
-        latestTime=timeLine[-1]
-        for time in timeLine:
-            if self.checkTimeDifference(time, latestTime):
-                dataset.pop(time)
-            else:
-                return
+        try:
+            timeLine=list(dataset.keys())
+            latestTime=timeLine[-1]
+
+            result=copy.deepcopy(dataset)
+            for time in timeLine:
+                if self.checkTimeDifference(time, latestTime, difference):
+                    result.pop(time)
+                else:
+                    return result
+        except:
+            return
 
     def getCurrentTime(self):
         '''
@@ -161,17 +193,21 @@ class DataBase():
         '''
         return datetime.now().strftime("%Y/%m/%d %H:%M:%S")
         
-    def checkTimeDifference(self, oldTime, newTime):
+    def checkTimeDifference(self, oldTime, newTime, difference=None):
         '''
             Check whether the time difference between 2 given time
-        exceeds the maximum storage
+        exceeds the given time difference
 
             By default, the time should be in the format: yyyy/mm/dd hh:mm:ss
+        and the time difference should be in unit: day
 
         Return:
-            result: Boolean, true if it exceeds the maximum storage, false otherwise
+            result: Boolean, true if it exceeds the time difference, false otherwise
         '''
         oldTime=datetime.strptime(oldTime, "%Y/%m/%d %H:%M:%S")
         newTime=datetime.strptime(newTime, "%Y/%m/%d %H:%M:%S")
-        maxTimeDifference=timedelta(hours=24*self.maximumStorage)
+        if difference:
+            maxTimeDifference=timedelta(hours=24*difference)
+        else:
+            maxTimeDifference=timedelta(hours=24*self.maximumStorage)
         return (newTime-oldTime>maxTimeDifference)
