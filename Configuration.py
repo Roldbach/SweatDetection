@@ -1,6 +1,6 @@
 #Basic configuration of pages
 pageConfiguration={
-    "width":500,
+    "width":1000,
     "height":800
 }
 
@@ -15,4 +15,10 @@ borderConfiguration={
     "size":"1",
     "type":"solid",
     "color":"black"
+}
+
+radioButtonConfiguration={
+    "option 1":1,
+    "option 2":7,
+    "option 3":31
 }

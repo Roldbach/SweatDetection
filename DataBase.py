@@ -22,6 +22,7 @@ class DataBase():
         self.Glucose=self.loadData("Glucose")
         self.CRP=self.loadData("CRP")
         self.ILBeta=self.loadData("ILBeta")
+        self.temperature=self.loadData("Temperature")
         self.maximumStorage=31
 
     def getNa(self):
@@ -39,6 +40,9 @@ class DataBase():
     def getILBeta(self):
         return self.ILBeta
 
+    def getTemperature(self):
+        return self.temperature
+
     def getMaximumStorage(self):
         return self.maximumStorage
     
@@ -50,6 +54,7 @@ class DataBase():
         result["Glucose"]=self.getLatestData(self.Glucose)
         result["CRP"]=self.getLatestData(self.CRP)
         result["ILBeta"]=self.getLatestData(self.ILBeta)
+        result["Temperature"]=self.getLatestData(self.temperature)
         return result
 
     def getLatestData(self, dataset):
@@ -79,6 +84,9 @@ class DataBase():
     def addILBeta(self, time, value):
         self.ILBeta[time]=value
 
+    def addTemperature(self, time ,value):
+        self.temperature[time]=value
+
     def setMaximumStorage(self, value):
         self.maximumStorage=value
     
@@ -88,6 +96,7 @@ class DataBase():
         self.saveData(self.Glucose, "Glucose")
         self.saveData(self.CRP, "CRP")
         self.saveData(self.ILBeta, "ILBeta")
+        self.saveData(self.temperature, "Temperature")
         self.saveConfiguration()
 
     def saveConfiguration(self, name="Configuration"):
@@ -111,6 +120,7 @@ class DataBase():
         self.loadData("Glucose")
         self.loadData("CRP")
         self.loadData("ILBeta")
+        self.loadData("Temperature")
 
     def loadData(self, name):
         '''
@@ -122,7 +132,7 @@ class DataBase():
                 lines=file.readlines()
             for line in lines:
                 index=line.index(",")
-                result[line[:index]]=line[index+1:].strip("\n")
+                result[line[:index]]=float(line[index+1:].strip("\n"))
         except FileNotFoundError:
             print("Fail to load "+name+".txt file. Please try again.")
         finally:
@@ -145,6 +155,7 @@ class DataBase():
         self.Glucose=self.sortData(self.Glucose)
         self.CRP=self.sortData(self.CRP)
         self.ILBeta=self.sortData(self.ILBeta)
+        self.temperature=self.sortData(self.temperature)
 
     def sortData(self, dataset):
         '''
@@ -164,6 +175,7 @@ class DataBase():
         self.Glucose=self.truncateData(self.Glucose)
         self.CRP=self.truncateData(self.CRP)
         self.ILBeta=self.truncateData(self.ILBeta)
+        self.temperature=self.truncateData(self.temperature)
 
     def truncateData(self, dataset, difference=None):
         '''

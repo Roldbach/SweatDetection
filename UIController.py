@@ -1,7 +1,10 @@
+import sys
 
+from Configuration import pageConfiguration
 from DataBase import DataBase
 from PyQt5.QtWidgets import*
 from UI.MainPage import MainPage
+from UI.PlotPage import PlotPage
 from UI.SettingPage import SettingPage
 from UI.Window import Window
 from UI.StartPage import StartPage
@@ -13,12 +16,13 @@ class UIController:
         self.window=Window()
         self.startPage=StartPage()
         self.mainPage=MainPage()
+        self.plotPage=PlotPage()
         self.settingPage=SettingPage()
         
         self.setStartPage()
         self.setMainPage()
+        self.setPlotPage()
         self.setSettingPage()
-        self.window.addPage(self.settingPage)
 
     def getWindow(self):
         return self.window
@@ -29,7 +33,7 @@ class UIController:
             (1) The start button should allow user to jump
                 to the main page
         '''
-        self.startPage.startButton.clicked.connect(lambda:self.window.switchPage(1))
+        self.startPage.startButton.clicked.connect(lambda:self.switchMainPage())
         self.window.addPage(self.startPage)
 
     def setMainPage(self):
@@ -40,9 +44,25 @@ class UIController:
             (2) The setting button should allow user to jump
                 to the setting page
         '''
-        self.mainPage.settingButton.clicked.connect(lambda:self.window.switchPage(2))
+        self.mainPage.plotButton.clicked.connect(self.switchPlotPage)
+        self.mainPage.settingButton.clicked.connect(self.switchSettingPage)
+        self.mainPage.quitButton.clicked.connect(self.quit)
         self.window.addPage(self.mainPage)
-    
+
+    def setPlotPage(self):
+        '''
+            Within the plot page:
+            (1) Each radio button could change the scale
+                of the plot
+            (2) The back button should allow user to jump back
+                to the main page
+        '''
+        self.plotPage.optionButton_1.clicked.connect(self.switchPlotPage)
+        self.plotPage.optionButton_2.clicked.connect(self.switchPlotPage)
+        self.plotPage.optionButton_3.clicked.connect(self.switchPlotPage)
+        self.plotPage.backButton.clicked.connect(self.switchMainPage)
+        self.window.addPage(self.plotPage)
+
     def setSettingPage(self):
         '''
             Within the setting page:
@@ -52,6 +72,8 @@ class UIController:
                 to the main page
         '''
         self.settingPage.changeMaximumStorageButton.clicked.connect(lambda:self.getMaximumStorage("Maximum Storage", "Please enter a new value:", "Please enter a valid integer."))
+        self.settingPage.backButton.clicked.connect(self.switchMainPage)
+        self.window.addPage(self.settingPage)
 
     def getMaximumStorage(self, title, description, error):
         '''
@@ -65,12 +87,15 @@ class UIController:
             error: String, the error message displayed to the user if not a valid input
         '''
         while True:
-            text, _=QInputDialog.getText(self.window, title, description, QLineEdit.Normal, "")
+            text, pressed=QInputDialog.getText(self.window, title, description, QLineEdit.Normal, "")
             try:
-                result=self.checkInteger(text)
-                self.dataBase.setMaximumStorage(result)
-                self.settingPage.updateMaximumStorage(result)
-                return
+                if pressed is not True:
+                    return
+                else:
+                    result=self.checkInteger(text)
+                    self.dataBase.setMaximumStorage(result)
+                    self.settingPage.updateMaximumStorage(result)
+                    return
             except:
                 self.showError(error)
     
@@ -98,13 +123,41 @@ class UIController:
             (1) Update all labels using the latest data
                 in the database
         '''
+        self.mainPage.update(self.getLatestData())
+        self.window.resize(pageConfiguration["width"], pageConfiguration["height"])
+        self.window.switchPage(1)
+
+    def switchPlotPage(self):
+        self.plotPage.plot(self.getTruncatedData())
+        self.window.switchPage(2)
+    
+    def switchSettingPage(self):
+        self.settingPage.updateMaximumStorage(self.dataBase.getMaximumStorage())
+        self.window.switchPage(3)
+
+    def getTruncatedData(self):
+        '''
+            Return the truncated data as a dictionary,
+        which could be directly used for plotting
+        '''
+        difference=self.plotPage.deformatChoice(self.plotPage.currentChoice)
+        result={}
+        result["Na"]=self.dataBase.truncateData(self.dataBase.getNa(), difference)
+        result["K"]=self.dataBase.truncateData(self.dataBase.getK(), difference)
+        result["Glucose"]=self.dataBase.truncateData(self.dataBase.getGlucose(), difference)
+        result["CRP"]=self.dataBase.truncateData(self.dataBase.getCRP(), difference)
+        result["ILBeta"]=self.dataBase.truncateData(self.dataBase.getILBeta(), difference)
+        result["Temperature"]=self.dataBase.truncateData(self.dataBase.getTemperature(), difference)
+        return result
 
     def getLatestData(self):
         '''
             Return the latest data as a dictionary
         '''
         result=self.dataBase.getLatest()
-        
+        result["Time"]=self.dataBase.getCurrentTime()[-8:-3]
+        return result
+
     def showError(self, text):
         '''
             Show an error message box to the user using the given text
@@ -116,6 +169,8 @@ class UIController:
         message.setText(text)
         message.exec_()
 
-
+    def quit(self):
+        self.dataBase.save()
+        sys.exit()
     
     

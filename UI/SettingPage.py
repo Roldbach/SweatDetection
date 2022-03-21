@@ -15,7 +15,7 @@ class SettingPage(QWidget):
         super().__init__()
         self.resize(pageConfiguration["width"], pageConfiguration["height"])
 
-        self.maximumStorageLabel=constructLabel("Maximum Storage: 31 days")
+        self.maximumStorageLabel=constructLabel()
         self.changeMaximumStorageButton=constructButton("Change")
         self.backButton=constructButton("Back")
 

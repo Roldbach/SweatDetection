@@ -4,7 +4,7 @@ from PyQt5.QtCore import*
 from PyQt5.QtGui import*
 from PyQt5.QtWidgets import*
 
-def constructLabel(text, font=widgetConfiguration["font"], size=widgetConfiguration["size"], bold=widgetConfiguration["bold"], border=widgetConfiguration["border"]):
+def constructLabel(text="", font=widgetConfiguration["font"], size=widgetConfiguration["size"], bold=widgetConfiguration["bold"], border=widgetConfiguration["border"]):
     label=QLabel(text)
     font=QFont(font, size)
     font.setBold(bold)
@@ -16,6 +16,11 @@ def constructLabel(text, font=widgetConfiguration["font"], size=widgetConfigurat
 
 def constructButton(text, font=widgetConfiguration["font"], size=widgetConfiguration["size"]):
     button=QPushButton(text)
+    button.setFont(QFont(font, size))
+    return button
+
+def constructRadioButton(text, font=widgetConfiguration["font"], size=widgetConfiguration["size"]):
+    button=QRadioButton(text)
     button.setFont(QFont(font, size))
     return button
 

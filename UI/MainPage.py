@@ -28,23 +28,24 @@ class MainPage(QWidget):
     def __init__(self):
         super().__init__()
         self.resize(pageConfiguration["width"], pageConfiguration["height"])
-        self.NaConcentrationLabel=constructLabel("53mM", size=32, border=True)
+        self.NaConcentrationLabel=constructLabel(size=32, border=True)
         self.NaLabel=constructLabel("Sodium (Na)", border=True)
-        self.KConcentrationLabel=constructLabel("34uM", size=32, border=True)
+        self.KConcentrationLabel=constructLabel(size=32, border=True)
         self.KLabel=constructLabel("Potassium (K)", border=True)
-        self.GlucoseConcentrationLabel=constructLabel("6.5mM", size=32, border=True)
+        self.GlucoseConcentrationLabel=constructLabel(size=32, border=True)
         self.GlucoseLabel=constructLabel("Glucose", border=True)
-        self.CRPConcentrationLabel=constructLabel("7.3mM", size=32, border=True)
+        self.CRPConcentrationLabel=constructLabel(size=32, border=True)
         self.CRPLabel=constructLabel("CRP", border=True)
-        self.ILBetaConcentrationLabel=constructLabel("7.7mM", size=32, border=True)
+        self.ILBetaConcentrationLabel=constructLabel(size=32, border=True)
         self.ILBetaLabel=constructLabel("IL-Beta", border=True)
-        self.temperatureValueLabel=constructLabel("35°C", size=32, border=True)
+        self.temperatureValueLabel=constructLabel(size=32, border=True)
         self.temperatureLabel=constructLabel("Temperature", border=True)
-        self.timeValueLabel=constructLabel("16:56", size=32, border=True)
+        self.timeValueLabel=constructLabel(size=32, border=True)
         self.timeLabel=constructLabel("Time", border=True)
 
         self.plotButton=constructButton("Plot")
         self.settingButton=constructButton("Setting")
+        self.quitButton=constructButton("Quit")
 
         NaLayout=self.constructLayout(self.NaConcentrationLabel, self.NaLabel)
         KLayout=self.constructLayout(self.KConcentrationLabel, self.KLabel)
@@ -68,7 +69,8 @@ class MainPage(QWidget):
         lowerLayout.addLayout(timeLayout, 0, 2)
         
         lowerLayout.addWidget(self.plotButton, 2, 0)
-        lowerLayout.addWidget(self.settingButton, 2, 2)
+        lowerLayout.addWidget(self.settingButton, 2, 1)
+        lowerLayout.addWidget(self.quitButton, 2, 2)
 
         layout=QVBoxLayout()
         layout.addLayout(upperLayout)
@@ -87,4 +89,30 @@ class MainPage(QWidget):
         layout.addWidget(nameLabel)
         layout.addWidget(QLabel(""))
         return layout
+    
+    def update(self, result):
+        '''
+            Update the main page using the given dataset for every label
+        '''
+        self.updateLabel(self.NaConcentrationLabel, result["Na"], "mM")
+        self.updateLabel(self.KConcentrationLabel, result["K"], "mM")
+        self.updateLabel(self.GlucoseConcentrationLabel, result["Glucose"], "µM")
+        self.updateLabel(self.CRPConcentrationLabel, result["CRP"], "mM")
+        self.updateLabel(self.ILBetaConcentrationLabel, result["ILBeta"], "mM")
+        self.updateLabel(self.temperatureValueLabel, result["Temperature"], "°C")
+        self.updateLabel(self.timeValueLabel, result["Time"])
 
+    def updateLabel(self, label, value, unit=""):
+        '''
+            Update the given label with the given value and
+        corresponding unit
+
+        input:
+            label: QLabel, the label displaying the value to the user
+            value: float, the latest value stored in the dataset
+            unit: String, the unit for the value
+        '''
+        if value!="None":
+            label.setText(str(value)+unit)
+        else:
+            label.setText("NaN")
