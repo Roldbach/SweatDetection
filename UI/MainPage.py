@@ -97,8 +97,8 @@ class MainPage(QWidget):
         self.updateLabel(self.NaConcentrationLabel, result["Na"], "mM")
         self.updateLabel(self.KConcentrationLabel, result["K"], "mM")
         self.updateLabel(self.GlucoseConcentrationLabel, result["Glucose"], "µM")
-        self.updateLabel(self.CRPConcentrationLabel, result["CRP"], "mM")
-        self.updateLabel(self.ILBetaConcentrationLabel, result["ILBeta"], "mM")
+        self.updateLabel(self.CRPConcentrationLabel, result["CRP"], "pg/mL")
+        self.updateLabel(self.ILBetaConcentrationLabel, result["ILBeta"], "ng/mL")
         self.updateLabel(self.temperatureValueLabel, result["Temperature"], "°C")
         self.updateLabel(self.timeValueLabel, result["Time"])
 
