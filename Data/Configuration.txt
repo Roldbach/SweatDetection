@@ -1,1 +1,1 @@
-maximum storage:1
+maximum storage:31

@@ -47,7 +47,6 @@ class DataBase():
         return self.maximumStorage
     
     def getLatest(self):
-        self.truncate()
         result={}
         result["Na"]=self.getLatestData(self.Na)
         result["K"]=self.getLatestData(self.K)
@@ -74,13 +73,13 @@ class DataBase():
 
     def addK(self, time ,value):
         self.K[time]=value
-    
+
     def addGlucose(self, time, value):
         self.Glucose[time]=value
-    
+
     def addCRP(self, time , value):
         self.CRP[time]=value
-    
+
     def addILBeta(self, time, value):
         self.ILBeta[time]=value
 

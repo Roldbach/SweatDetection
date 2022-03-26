@@ -22,3 +22,10 @@ radioButtonConfiguration={
     "option 2":7,
     "option 3":31
 }
+
+#Basic configuration of bluetooth
+bluetoothConfiguration={
+    "port":"COM6",
+    "baud rate":9600,
+    "interval":60000
+}

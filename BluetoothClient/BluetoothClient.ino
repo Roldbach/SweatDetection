@@ -1,7 +1,10 @@
 #include <dht_nonblocking.h>
 #define dhtSensorType DHT_TYPE_11
+#define redLED 4
+#define blueLED 5
+#define buzzer 6
 
-int command;
+int incomingByte;
 const int baudRate=9600;
 const int dhtSensorPin=2;
 float Na;
@@ -194,10 +197,42 @@ void uploadTemperature(float *temperature, float *humidity)
    {Serial.println("Temperature,"+String(*temperature));}
 }
 
+void alarm()
+{
+  /*
+   * Fire alarm if received the command from the PC
+   * 
+   * The alarm simulates the ambulance alarm:
+   * (1) Red/Blue LED will blink for 5s
+   * (2) The buzzer will beep at different frequency for 5s
+   * (3) The alarm automatically stops after 5s
+   */
+   digitalWrite(redLED, LOW);
+   digitalWrite(blueLED, LOW);
+   
+   for (int i=0;i<5;i++)
+   {
+    tone(buzzer, 660, 500);
+    digitalWrite(redLED, HIGH);
+    digitalWrite(blueLED, LOW);
+    delay(500);
+    
+    tone(buzzer, 494, 500);
+    digitalWrite(redLED, LOW);
+    digitalWrite(blueLED, HIGH);
+    delay(500);
+   }  
+
+   digitalWrite(redLED, LOW);
+   digitalWrite(blueLED, LOW);
+}
+
 void setup() {
   Serial.begin(baudRate);
-  pinMode(LED_BUILTIN, OUTPUT);
-  digitalWrite(LED_BUILTIN, LOW);
+  pinMode(redLED, OUTPUT);
+  pinMode(blueLED, OUTPUT);
+  digitalWrite(redLED, LOW);
+  digitalWrite(blueLED, LOW);
 }
 
 void loop()
@@ -210,23 +245,17 @@ void loop()
    * (4) Upload the CRP concentration
    * (5) Upload the ILBeta concentration
    * (6) Upload the Temperature reading
-   * (7) Check whether there is alarm from the serve
+   * (7) Fire alarm if received command from PC
    */
   uploadNa(&Na);
   uploadK(&K);
   uploadGlucose(&Glucose);
   uploadCRP(&CRP);
   uploadILBeta(&ILBeta);
+  uploadTemperature(&temperature, &humidity);
   if (Serial.available() > 0)
   {
-    command = Serial.read();
-    if (command == 'H')
-    {
-      digitalWrite(LED_BUILTIN, HIGH);
-    }
-    if (command == 'L')
-    {
-      digitalWrite(LED_BUILTIN, LOW);
-    }
+    incomingByte = Serial.read();
+    if (incomingByte == 'H') { alarm();}
   }
 }

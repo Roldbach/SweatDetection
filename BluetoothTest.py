@@ -8,8 +8,7 @@ print("Connected")
 bluetooth.flushInput() #This gives the bluetooth a little kick
 
 for i in range(100):
-    result=bluetooth.readline()
-    print(result)
+    print(bluetooth.readline())
 
 bluetooth.close() #Otherwise the connection will remain open until a timeout which ties up the /dev/thingamabob
 print("Done")

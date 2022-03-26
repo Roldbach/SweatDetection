@@ -1,8 +1,10 @@
 import sys
 
+from BluetoothServe import BluetoothServe
 from Configuration import pageConfiguration
 from DataBase import DataBase
 from PyQt5.QtWidgets import*
+from PyQt5.QtCore import QTimer
 from UI.MainPage import MainPage
 from UI.PlotPage import PlotPage
 from UI.SettingPage import SettingPage
@@ -12,8 +14,10 @@ from UI.StartPage import StartPage
 class UIController:
     def __init__(self):
         self.dataBase=DataBase()
+        self.bluetooth=BluetoothServe()
         self.application=QApplication([])
         self.window=Window()
+        self.timer=QTimer(self.window)
         self.startPage=StartPage()
         self.mainPage=MainPage()
         self.plotPage=PlotPage()
@@ -30,10 +34,14 @@ class UIController:
     def setStartPage(self):
         '''
             Within the start page:
+            (1) The start button should start the communication
+                between arduino and PC via bluetooth
             (1) The start button should allow user to jump
-                to the main page
+                to the main page (only if the bluetooth connection
+                is good)
         '''
-        self.startPage.startButton.clicked.connect(lambda:self.switchMainPage())
+        self.startPage.startButton.clicked.connect(self.connectBluetooth)
+        self.startPage.startButton.clicked.connect(self.switchMainPage)
         self.window.addPage(self.startPage)
 
     def setMainPage(self):
@@ -74,6 +82,21 @@ class UIController:
         self.settingPage.changeMaximumStorageButton.clicked.connect(lambda:self.getMaximumStorage("Maximum Storage", "Please enter a new value:", "Please enter a valid integer."))
         self.settingPage.backButton.clicked.connect(self.switchMainPage)
         self.window.addPage(self.settingPage)
+
+    def connectBluetooth(self):
+        '''
+            Connect to the arduino via bluetooth
+
+            If successfully connecting to the sensor,
+        start collecting data, otherwise report error
+        to the user 
+        '''
+        self.bluetooth.connect()
+        if self.bluetooth.status==True:
+            self.timer.timeout.connect(self.updateMainPage)
+            self.timer.start(1000)
+        else:
+            self.showError("Can't connect to the sensor. Please try again.")
 
     def getMaximumStorage(self, title, description, error):
         '''
@@ -119,13 +142,19 @@ class UIController:
 
     def switchMainPage(self):
         '''
+            Only switch to the main page when the bluetooth
+        connection is good, otherwise force the user to stay
+        at the start page and try again
+
             Before displaying the main page:
             (1) Update all labels using the latest data
                 in the database
         '''
-        self.mainPage.update(self.getLatestData())
-        self.window.resize(pageConfiguration["width"], pageConfiguration["height"])
-        self.window.switchPage(1)
+        if self.bluetooth.status==True:
+            self.window.switchPage(1)
+        else:
+            self.showError("Can't connect to the sensor. Please try again.")
+            self.window.switchPage(0)
 
     def switchPlotPage(self):
         self.plotPage.plot(self.getTruncatedData())
@@ -149,6 +178,40 @@ class UIController:
         result["ILBeta"]=self.dataBase.truncateData(self.dataBase.getILBeta(), difference)
         result["Temperature"]=self.dataBase.truncateData(self.dataBase.getTemperature(), difference)
         return result
+
+    def updateMainPage(self):
+        self.collect()
+        self.mainPage.update(self.getLatestData())
+
+    def collect(self):
+        '''
+            Collect the data from the arduino and 
+        add it to the database after formatting
+        '''
+        if self.bluetooth.status==True:
+            result=self.bluetooth.read()
+            self.addData(result)
+    
+    def addData(self, text):
+        '''
+            Format the data from the arduino and add to the database
+        '''
+        index=text.index(",")
+        flag=text[:index]
+        value=float(text[index+1:])
+
+        if flag=="Na":
+            self.dataBase.addNa(self.dataBase.getCurrentTime(), value)
+        elif flag=="K":
+            self.dataBase.addK(self.dataBase.getCurrentTime(), value)
+        elif flag=="Glucose":
+            self.dataBase.addGlucose(self.dataBase.getCurrentTime(), value)
+        elif flag=="CRP":
+            self.dataBase.addCRP(self.dataBase.getCurrentTime(), value)
+        elif flag=="ILBeta":
+            self.dataBase.addILBeta(self.dataBase.getCurrentTime(), value)
+        else:
+            self.dataBase.addTemperature(self.dataBase.getCurrentTime(), value)
 
     def getLatestData(self):
         '''
