@@ -1,8 +1,10 @@
+from types import TracebackType
 import numpy as np
 import matplotlib.pyplot as plt
 
 from Configuration import pageConfiguration, radioButtonConfiguration
 from PyQt5.QtWidgets import*
+from PyQt5.QtCore import*
 from UI.WindowHelper import*
 
 class PlotPage(QWidget):
@@ -79,8 +81,7 @@ class PlotPage(QWidget):
         layout=QGridLayout()
         layout.addWidget(QLabel(""), 0, 0)
         layout.addWidget(QLabel(""), 1, 0)
-        layout.addLayout(middleLayout, 2, 0, 6, 0)
-        layout.addWidget(QLabel(""), 7, 0)
+        layout.addLayout(middleLayout, 2, 0, 7, 0)
         layout.addWidget(QLabel(""), 8, 0)
         layout.addLayout(radioButtonLayout, 9, 0)
         layout.addWidget(QLabel(""), 10, 0)
@@ -150,10 +151,8 @@ class PlotPage(QWidget):
         timeTick=[timeLine[i] for i in percentile]
 
         figure, axis=plt.subplots(figsize=(3, 2), dpi=300)
-        axis.plot(value, color="black")
-        axis.set_title(name+" in "+scale)
-        axis.set_ylabel(name+"("+unit+")")
-        axis.set_xlabel("Time")
+        axis.plot(value, color="black", linewidth=0.5)
+        axis.set_title(name+"("+unit+")"+" in "+scale)
         axis.set_xticks(percentile)
         axis.set_xticklabels(timeTick, fontsize=4)
 

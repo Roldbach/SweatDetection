@@ -1,7 +1,6 @@
 import sys
 
 from BluetoothServe import BluetoothServe
-from Configuration import pageConfiguration
 from DataBase import DataBase
 from PyQt5.QtWidgets import*
 from PyQt5.QtCore import QTimer
@@ -17,7 +16,8 @@ class UIController:
         self.bluetooth=BluetoothServe()
         self.application=QApplication([])
         self.window=Window()
-        self.timer=QTimer(self.window)
+        self.readTimer=QTimer(self.window)
+        self.writeTimer=QTimer(self.window)
         self.startPage=StartPage()
         self.mainPage=MainPage()
         self.plotPage=PlotPage()
@@ -87,16 +87,22 @@ class UIController:
         '''
             Connect to the arduino via bluetooth
 
-            If successfully connecting to the sensor,
-        start collecting data, otherwise report error
-        to the user 
+            After connecting to the arduino:
+            (1) Read data from arduino every 1s
+            (2) Check the status of the user every 10min
         '''
         self.bluetooth.connect()
         if self.bluetooth.status==True:
-            self.timer.timeout.connect(self.updateMainPage)
-            self.timer.start(1000)
+            self.readTimer.timeout.connect(self.updateMainPage)
+            self.readTimer.start(1000)
+            self.writeTimer.timeout.connect(self.fireAlarm)
+            self.writeTimer.start(10000)
         else:
             self.showError("Can't connect to the sensor. Please try again.")
+    
+    def fireAlarm(self):
+        if self.dataBase.checkStatus():
+            self.bluetooth.write()
 
     def getMaximumStorage(self, title, description, error):
         '''

@@ -1,7 +1,8 @@
 import copy
 
+from Configuration import meanConfiguration
 from datetime import datetime, timedelta
-
+from statistics import mean
 class DataBase():
     def __init__(self, directory="./Data"):
         '''
@@ -47,6 +48,7 @@ class DataBase():
         return self.maximumStorage
     
     def getLatest(self):
+        self.truncate()
         result={}
         result["Na"]=self.getLatestData(self.Na)
         result["K"]=self.getLatestData(self.K)
@@ -218,7 +220,34 @@ class DataBase():
         oldTime=datetime.strptime(oldTime, "%Y/%m/%d %H:%M:%S")
         newTime=datetime.strptime(newTime, "%Y/%m/%d %H:%M:%S")
         if difference:
-            maxTimeDifference=timedelta(hours=24*difference)
+            maxTimeDifference=timedelta(hours=round(24*difference))
         else:
             maxTimeDifference=timedelta(hours=24*self.maximumStorage)
         return (newTime-oldTime>maxTimeDifference)
+    
+    def checkStatus(self):
+        '''
+            Check whether the health status is in danger for each
+        data type
+        '''
+        try:
+            self.checkTruncatedMean(self.Na, meanConfiguration["Na"])
+            self.checkTruncatedMean(self.K, meanConfiguration["K"])
+            self.checkTruncatedMean(self.Glucose, meanConfiguration["Glucose"])
+            self.checkTruncatedMean(self.CRP, meanConfiguration["CRP"])
+            self.checkTruncatedMean(self.ILBeta, meanConfiguration["ILBeta"])
+            return False
+        except:
+            return True
+
+    def checkTruncatedMean(self, dataset, theoreticalMean, difference=1/144):
+        '''
+            Check whether the truncated dataset has a higher mean
+        than theoretical value, otherwise raise error
+
+            By default, the time difference checked is 10min
+        '''
+        data=self.truncateData(dataset, difference)
+        actualMean=mean(list(data.values()))
+        if actualMean>theoreticalMean:
+            raise ValueError

@@ -29,3 +29,12 @@ bluetoothConfiguration={
     "baud rate":9600,
     "interval":60000
 }
+
+#Basic configuration of firing alarm
+meanConfiguration={
+    "Na":75,
+    "K":15.5,
+    "Glucose":100,
+    "CRP":5,
+    "ILBeta":100,
+}

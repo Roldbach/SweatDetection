@@ -258,4 +258,5 @@ void loop()
     incomingByte = Serial.read();
     if (incomingByte == 'H') { alarm();}
   }
+  delay(1000);
 }
