@@ -27,7 +27,8 @@ radioButtonConfiguration={
 bluetoothConfiguration={
     "port":"COM6",
     "baud rate":9600,
-    "interval":60000
+    "read interval":1000,
+    "check interval":10000
 }
 
 #Basic configuration of firing alarm

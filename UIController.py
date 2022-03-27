@@ -1,6 +1,7 @@
 import sys
 
 from BluetoothServe import BluetoothServe
+from Configuration import bluetoothConfiguration
 from DataBase import DataBase
 from PyQt5.QtWidgets import*
 from PyQt5.QtCore import QTimer
@@ -51,6 +52,8 @@ class UIController:
                 to the plot page
             (2) The setting button should allow user to jump
                 to the setting page
+            (3) The quit button should save the database before
+                exiting the app
         '''
         self.mainPage.plotButton.clicked.connect(self.switchPlotPage)
         self.mainPage.settingButton.clicked.connect(self.switchSettingPage)
@@ -60,9 +63,11 @@ class UIController:
     def setPlotPage(self):
         '''
             Within the plot page:
-            (1) Each radio button could change the scale
+            (1) The combo box allows to display different
+                plots using the same space
+            (2) Each radio button could change the scale
                 of the plot
-            (2) The back button should allow user to jump back
+            (3) The back button should allow user to jump back
                 to the main page
         '''
         self.plotPage.optionButton_1.clicked.connect(self.switchPlotPage)
@@ -88,19 +93,23 @@ class UIController:
             Connect to the arduino via bluetooth
 
             After connecting to the arduino:
-            (1) Read data from arduino every 1s
-            (2) Check the status of the user every 10min
+            (1) By default, read data from arduino every 1s
+            (2) By default, check the status of the user every 10s
         '''
         self.bluetooth.connect()
         if self.bluetooth.status==True:
             self.readTimer.timeout.connect(self.updateMainPage)
-            self.readTimer.start(1000)
+            self.readTimer.start(bluetoothConfiguration["read interval"])
             self.writeTimer.timeout.connect(self.fireAlarm)
-            self.writeTimer.start(10000)
+            self.writeTimer.start(bluetoothConfiguration["write interval"])
         else:
             self.showError("Can't connect to the sensor. Please try again.")
     
     def fireAlarm(self):
+        '''
+            Only send a command to arduino to fire the 
+        alarm if the health status is in danger
+        '''
         if self.dataBase.checkStatus():
             self.bluetooth.write()
 
@@ -151,10 +160,6 @@ class UIController:
             Only switch to the main page when the bluetooth
         connection is good, otherwise force the user to stay
         at the start page and try again
-
-            Before displaying the main page:
-            (1) Update all labels using the latest data
-                in the database
         '''
         if self.bluetooth.status==True:
             self.window.switchPage(1)
@@ -163,10 +168,18 @@ class UIController:
             self.window.switchPage(0)
 
     def switchPlotPage(self):
+        '''
+            Before displaying the plot page, plot all graphs
+        using truncated data
+        '''
         self.plotPage.plot(self.getTruncatedData())
         self.window.switchPage(2)
     
     def switchSettingPage(self):
+        '''
+            Before displaying the setting page, update the
+        label using the current setting
+        '''
         self.settingPage.updateMaximumStorage(self.dataBase.getMaximumStorage())
         self.window.switchPage(3)
 
@@ -239,7 +252,12 @@ class UIController:
         message.exec_()
 
     def quit(self):
+        '''
+            Save the database and stop the 
+        bluetooth connection before exiting the app
+        '''
         self.dataBase.save()
+        self.bluetooth.close()
         sys.exit()
     
     

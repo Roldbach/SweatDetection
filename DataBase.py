@@ -3,6 +3,7 @@ import copy
 from Configuration import meanConfiguration
 from datetime import datetime, timedelta
 from statistics import mean
+
 class DataBase():
     def __init__(self, directory="./Data"):
         '''
@@ -48,6 +49,10 @@ class DataBase():
         return self.maximumStorage
     
     def getLatest(self):
+        '''
+            Return all latest data as a dictionary,
+        which could be used for updating the main page
+        '''
         self.truncate()
         result={}
         result["Na"]=self.getLatestData(self.Na)
@@ -61,8 +66,7 @@ class DataBase():
     def getLatestData(self, dataset):
         '''
             Return the latest data stored in the dataset
-
-            Return None if no data stored previously
+        or None if no data has been stored previously
         '''
         try:
             timeLine=list(dataset.keys())
@@ -107,7 +111,7 @@ class DataBase():
 
     def saveData(self, dataset, name):
         '''
-            Save time-value pair separated by ","
+            Save all time-value pairs separated by ","
         '''
         with open(self.directory+"/"+name+".txt", "w") as file:
             for pair in dataset.items():
@@ -180,7 +184,8 @@ class DataBase():
 
     def truncateData(self, dataset, difference=None):
         '''
-            Truncate the dataset using the given time difference
+            Filter the dataset so it only keeps data that
+        are within the given time range
         '''
         try:
             timeLine=list(dataset.keys())
@@ -245,7 +250,8 @@ class DataBase():
             Check whether the truncated dataset has a higher mean
         than theoretical value, otherwise raise error
 
-            By default, the time difference checked is 10min
+            By default, only data within the latest 10 min would be
+        checked
         '''
         data=self.truncateData(dataset, difference)
         actualMean=mean(list(data.values()))
