@@ -102,8 +102,6 @@ class UIController:
             self.readTimer.start(bluetoothConfiguration["read interval"])
             self.writeTimer.timeout.connect(self.fireAlarm)
             self.writeTimer.start(bluetoothConfiguration["write interval"])
-        else:
-            self.showError("Can't connect to the sensor. Please try again.")
     
     def fireAlarm(self):
         '''

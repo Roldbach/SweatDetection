@@ -74,6 +74,17 @@ class DataBase():
         except:
             return "None"
 
+    def getCurrentTime(self):
+        '''
+            Get the formatted current time
+
+            By default, the time should be in the format: yyyy/mm/dd hh:mm:ss
+        
+        Return:
+            result: String, the formatted current time
+        '''
+        return datetime.now().strftime("%Y/%m/%d %H:%M:%S")
+
     def addNa(self, time, value):
         self.Na[time]=value
 
@@ -199,17 +210,6 @@ class DataBase():
                     return result
         except:
             return
-
-    def getCurrentTime(self):
-        '''
-            Get the formatted current time
-
-            By default, the time should be in the format: yyyy/mm/dd hh:mm:ss
-        
-        Return:
-            result: String, the formatted current time
-        '''
-        return datetime.now().strftime("%Y/%m/%d %H:%M:%S")
         
     def checkTimeDifference(self, oldTime, newTime, difference=None):
         '''
