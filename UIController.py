@@ -101,7 +101,7 @@ class UIController:
             self.readTimer.timeout.connect(self.updateMainPage)
             self.readTimer.start(bluetoothConfiguration["read interval"])
             self.writeTimer.timeout.connect(self.fireAlarm)
-            self.writeTimer.start(bluetoothConfiguration["write interval"])
+            self.writeTimer.start(bluetoothConfiguration["check interval"])
     
     def fireAlarm(self):
         '''
