@@ -4,7 +4,7 @@ This is the official implementation of the project "A Wearable Sweat-detection D
 ## Get Started
 - To successfully use our program, an Arduino Uno-based circuit is required to pair with the computer first. This could be done by:
 
-    1. Correctly connect the circuit (could be found in the ***Diagram***).
+    1. Correctly connect the circuit (could be found in the ***Diagram***.
     2. Open the Bluetooth control pannel using computer and find the device called "HC-05".
     3. Pair the device with default password: 1234
     
