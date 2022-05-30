@@ -13,7 +13,7 @@ This is the official implementation of the project "A Wearable Sweat-detection D
     For more detailed instrution, please visit: https://www.instructables.com/Arduino-AND-Bluetooth-HC-05-Connecting-easily/
 - Run the **Main.py** script to start the monitoring program.
 - By default, we use the serial port **COM6** for Bluetooth connection. Please make sure the availability of this port. To change to another port, please modify the **Configuration.py**.
----
+
 ## General Structure
 This repopsitory could be mainly divided into:
 - Report Related
